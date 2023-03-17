@@ -32,7 +32,7 @@ require_login(null, false);
 require_capability('moodle/site:config', context_system::instance());
 
 global $_SERVER;
-$returnurl = $_SERVER['HTTP_REFERER'];
+$returnurl = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '/';
 
 $PAGE->set_url('/admin/tool/mfa/index.php');
 

@@ -45,8 +45,25 @@ function tool_mfa_after_require_login($courseorid = null, $autologinguest = null
         $SESSION->mfa_login_hook_test = true;
     }
 
-    if (empty($SESSION->tool_mfa_authenticated)) {
-        \tool_mfa\manager::require_auth($courseorid, $autologinguest, $cm, $setwantsurltome, $preventredirect);
+    // Get course custom fields to check for "requires_mfa" checkbox is set.
+    /** @var data_controller[] $courseCustomFields */
+    $courseCustomFields = [];
+    $requiresMFA = false;
+    if ($courseorid && $courseorid instanceof stdClass) {
+        $course = new core_course_list_element($courseorid);
+        if ($course->has_custom_fields()) {
+            $courseCustomFields = $course->get_custom_fields();
+        }
+    }
+
+    foreach ($courseCustomFields as $courseCustomField) {
+        if ($courseCustomField->get_field()->get('shortname') == 'requires_mfa') {
+            $requiresMFA = (bool) $courseCustomField->get_value();
+        }
+    }
+
+    if ($requiresMFA && empty($SESSION->tool_mfa_authenticated)) {
+        manager::require_auth($courseorid, $autologinguest, $cm, $setwantsurltome, $preventredirect);
     }
 }
 
@@ -94,12 +111,12 @@ function tool_mfa_after_config() {
     }
 
     // Check for not logged in.
-    if (isloggedin() && !isguestuser()) {
-        // If not authenticated, force login required.
-        if (empty($SESSION->tool_mfa_authenticated)) {
-            \tool_mfa\manager::require_auth();
-        }
-    }
+//    if (isloggedin() && !isguestuser()) {
+//        // If not authenticated, force login required.
+//        if (empty($SESSION->tool_mfa_authenticated)) {
+//            \tool_mfa\manager::require_auth();
+//        }
+//    }
 }
 
 /**

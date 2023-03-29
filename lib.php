@@ -63,7 +63,34 @@ function tool_mfa_after_require_login($courseorid = null, $autologinguest = null
     }
 
     if ($requiresMFA && empty($SESSION->tool_mfa_authenticated)) {
-        manager::require_auth($courseorid, $autologinguest, $cm, $setwantsurltome, $preventredirect);
+
+        // Redirect user to MFA Factory setup page when a factor requires user setup.
+        if(tool_mfa_user_factor_setup_required()){
+            $redirectUrl = new moodle_url('/admin/tool/mfa/user_preferences.php');
+            redirect($redirectUrl);
+        }
+
+        tool_mfa\manager::require_auth($courseorid, $autologinguest, $cm, $setwantsurltome, $preventredirect);
+    }
+}
+
+/**
+ * Check if a factor needs to be setup by the user
+ * Redirect user to the Factor's setup page automatically.
+ *
+ * @throws dml_exception
+ */
+function tool_mfa_user_factor_setup_required() {
+    if (\tool_mfa\manager::is_ready() && \tool_mfa\manager::possible_factor_setup()) {
+        $factors = \tool_mfa\plugininfo\factor::get_enabled_factors();
+        $userfactors = \tool_mfa\plugininfo\factor::get_active_user_factor_types();
+
+        // Active user factors exists so no user factor setup required.
+        if(!empty($userfactors)) {
+            return false;
+        }
+
+        return true;
     }
 }
 

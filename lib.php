@@ -62,7 +62,7 @@ function tool_mfa_after_require_login($courseorid = null, $autologinguest = null
         }
     }
 
-    if ($requiresMFA && empty($SESSION->tool_mfa_authenticated)) {
+    if (!is_siteadmin() && $requiresMFA && empty($SESSION->tool_mfa_authenticated)) {
 
         // Redirect user to MFA Factory setup page when a factor requires user setup.
         if(tool_mfa_user_factor_setup_required()){

@@ -36,8 +36,41 @@
  * @return void
  * @throws \moodle_exception
  */
-function tool_mfa_after_require_login($courseorid = null, $autologinguest = null, $cm = null,
-    $setwantsurltome = null, $preventredirect = null) {
+
+function skip_mfa_for_user_with_roles($roles = [])
+{
+    global $USER, $COURSE;
+
+    if (!isset($COURSE)) {
+        return true;
+    }
+
+    if (is_siteadmin()) {
+        return true;
+    }
+
+    if (isloggedin() && !isguestuser()) {
+        $courseContext = context_course::instance($COURSE->id);
+        $userRoleInCourse = get_user_roles($courseContext, $USER->id);
+
+        foreach ($userRoleInCourse as $userRole) {
+            if (in_array($userRole->shortname, $roles)) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+
+function tool_mfa_after_require_login(
+    $courseorid = null,
+    $autologinguest = null,
+    $cm = null,
+    $setwantsurltome = null,
+    $preventredirect = null
+) {
 
     global $SESSION;
     // Tests for hooks being fired to test patches.
@@ -62,10 +95,10 @@ function tool_mfa_after_require_login($courseorid = null, $autologinguest = null
         }
     }
 
-    if (!is_siteadmin() && $requiresMFA && empty($SESSION->tool_mfa_authenticated)) {
+    if (!skip_mfa_for_user_with_roles(["teacher", "editingteacher", "manager", "coursecreator"]) && $requiresMFA && empty($SESSION->tool_mfa_authenticated)) {
 
         // Redirect user to MFA Factory setup page when a factor requires user setup.
-        if(tool_mfa_user_factor_setup_required()){
+        if (tool_mfa_user_factor_setup_required()) {
             $redirectUrl = new moodle_url('/admin/tool/mfa/user_preferences.php');
             redirect($redirectUrl);
         }
@@ -80,13 +113,14 @@ function tool_mfa_after_require_login($courseorid = null, $autologinguest = null
  *
  * @throws dml_exception
  */
-function tool_mfa_user_factor_setup_required() {
+function tool_mfa_user_factor_setup_required()
+{
     if (\tool_mfa\manager::is_ready() && \tool_mfa\manager::possible_factor_setup()) {
         $factors = \tool_mfa\plugininfo\factor::get_enabled_factors();
         $userfactors = \tool_mfa\plugininfo\factor::get_active_user_factor_types();
 
         // Active user factors exists so no user factor setup required.
-        if(!empty($userfactors)) {
+        if (!empty($userfactors)) {
             return false;
         }
 
@@ -106,7 +140,8 @@ function tool_mfa_user_factor_setup_required() {
  * @return void or null
  * @throws \moodle_exception
  */
-function tool_mfa_extend_navigation_user_settings($navigation, $user, $usercontext, $course, $coursecontext) {
+function tool_mfa_extend_navigation_user_settings($navigation, $user, $usercontext, $course, $coursecontext)
+{
     global $PAGE;
 
     // Only inject if user is on the preferences page.
@@ -117,8 +152,11 @@ function tool_mfa_extend_navigation_user_settings($navigation, $user, $userconte
 
     if (\tool_mfa\manager::is_ready() && \tool_mfa\manager::possible_factor_setup()) {
         $url = new moodle_url('/admin/tool/mfa/user_preferences.php');
-        $node = navigation_node::create(get_string('preferences:header', 'tool_mfa'), $url,
-            navigation_node::TYPE_SETTING);
+        $node = navigation_node::create(
+            get_string('preferences:header', 'tool_mfa'),
+            $url,
+            navigation_node::TYPE_SETTING
+        );
         $usernode = $navigation->find('useraccount', navigation_node::TYPE_CONTAINER);
         $usernode->add_node($node);
     }
@@ -128,7 +166,8 @@ function tool_mfa_extend_navigation_user_settings($navigation, $user, $userconte
  * Triggered as soon as practical on every moodle bootstrap after config has
  * been loaded. The $USER object is available at this point too.
  */
-function tool_mfa_after_config() {
+function tool_mfa_after_config()
+{
     global $CFG, $SESSION;
 
     // Tests for hooks being fired to test patches.
@@ -138,18 +177,19 @@ function tool_mfa_after_config() {
     }
 
     // Check for not logged in.
-//    if (isloggedin() && !isguestuser()) {
-//        // If not authenticated, force login required.
-//        if (empty($SESSION->tool_mfa_authenticated)) {
-//            \tool_mfa\manager::require_auth();
-//        }
-//    }
+    //    if (isloggedin() && !isguestuser()) {
+    //        // If not authenticated, force login required.
+    //        if (empty($SESSION->tool_mfa_authenticated)) {
+    //            \tool_mfa\manager::require_auth();
+    //        }
+    //    }
 }
 
 /**
  * Any plugin typically an admin tool can add new bulk user actions
  */
-function tool_mfa_bulk_user_actions() {
+function tool_mfa_bulk_user_actions()
+{
     return [
         'tool_mfa_reset_factors' => new action_link(
             new moodle_url('/admin/tool/mfa/reset_factor.php'),
@@ -170,7 +210,8 @@ function tool_mfa_bulk_user_actions() {
  * @param array $options
  * @return bool
  */
-function tool_mfa_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = []) {
+function tool_mfa_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = [])
+{
     // Hardcode to only send guidance files from the top level.
     $fs = get_file_storage();
     $file = $fs->get_file(

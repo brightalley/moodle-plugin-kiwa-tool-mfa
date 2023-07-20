@@ -486,13 +486,10 @@ class manager {
 
         // Site policy.
         if (isset($USER->policyagreed) && !$USER->policyagreed) {
-            // Privacy classes may not exist in older Moodles/Totara.
-            if (class_exists('\core_privacy\local\sitepolicy\manager')) {
-                $manager = new \core_privacy\local\sitepolicy\manager();
-                $policyurl = $manager->get_redirect_url(false);
-                if (!empty($policyurl) && $url->compare($policyurl, URL_MATCH_BASE)) {
-                    return self::NO_REDIRECT;
-                }
+            $manager = new \core_privacy\local\sitepolicy\manager();
+            $policyurl = $manager->get_redirect_url(false);
+            if (!empty($policyurl) && $url->compare($policyurl, URL_MATCH_BASE)) {
+                return self::NO_REDIRECT;
             }
         }
 
@@ -596,7 +593,8 @@ class manager {
             $duration = 0.05;
         }
         set_user_preference('mfa_sleep_duration', $duration, $USER);
-        sleep($duration);
+        // Sleep for duration in microseconds.
+        usleep($duration * 1000000);
     }
 
     /**
@@ -704,18 +702,18 @@ class manager {
     public static function is_ready() {
         global $CFG, $USER;
 
-        // Check if user can interact with MFA.
-        $usercontext = \context_user::instance($USER->id);
-        if (!has_capability('tool/mfa:mfaaccess', $usercontext)) {
-            return false;
-        }
-
         if (!empty($CFG->upgraderunning)) {
             return false;
         }
 
         $pluginenabled = get_config('tool_mfa', 'enabled');
         if (empty($pluginenabled)) {
+            return false;
+        }
+
+        // Check if user can interact with MFA.
+        $usercontext = \context_user::instance($USER->id);
+        if (!has_capability('tool/mfa:mfaaccess', $usercontext)) {
             return false;
         }
 

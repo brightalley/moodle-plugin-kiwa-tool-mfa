@@ -22,8 +22,7 @@
  * @copyright   Catalyst IT
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-$string['pluginname'] = 'Security Questions';
-$string['info'] = 'Answer Security Questions as a factor.';
+$string['info'] = 'Answer security questions as a factor.';
+$string['pluginname'] = 'Security questions';
+$string['privacy:metadata'] = 'The security questions factor plugin does not store any personal data';
 $string['summarycondition'] = 'answers security questions';
-
-$string['privacy:metadata'] = 'The Security Questions factor plugin does not store any personal data';

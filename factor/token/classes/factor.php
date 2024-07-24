@@ -144,9 +144,14 @@ class factor extends object_factor_base {
         // First thing, we need to decide on whether we should show the checkbox.
         $noproperty = !property_exists($SESSION, 'tool_mfa_factor_token');
         $nostate = $this->get_state() !== \tool_mfa\plugininfo\factor::STATE_PASS;
+        // We shouldn't show if the current factor does not give points.  Nothing to "trust" in that case.
+        $factor = \tool_mfa\plugininfo\factor::get_next_user_factor();
+        $weight = $factor->get_weight();
+        // We also shouldn't display if the duration for the user is 0;
+        $expiryconfig = is_siteadmin() ? 'adminexpiry' : 'expiry';
+        $expiry = get_config('factor_token', $expiryconfig);
 
-        if ($noproperty && $nostate) {
-            $expiry = get_config('factor_token', 'expiry');
+        if ($noproperty && $nostate && $weight !== 0 && !empty($expiry)) {
             $expirystring = format_time($expiry);
             $mform->addElement('advcheckbox', 'factor_token_trust', '', get_string('form:trust', 'factor_token', $expirystring));
             $mform->setType('factor_token_trust', PARAM_BOOL);
@@ -163,9 +168,11 @@ class factor extends object_factor_base {
     public function global_submit($data) {
         global $SESSION;
 
-        // Store any kind of response here, we shouldnt show again.
-        $trust = $data->factor_token_trust;
-        $SESSION->tool_mfa_factor_token = $trust;
+        if (property_exists($data, "factor_token_trust")) {
+            // Store any kind of response here, we shouldnt show again.
+            $trust = $data->factor_token_trust;
+            $SESSION->tool_mfa_factor_token = $trust;
+        }
     }
 
     /**
@@ -218,7 +225,8 @@ class factor extends object_factor_base {
 
         // Calculate the expiry time. This is provided by config,
         // But optionally might need to be rounded  to expire a few hours after 0000 server time.
-        $expiry = get_config('factor_token', 'expiry');
+        $expiryconfig = is_siteadmin() ? 'adminexpiry' : 'expiry';
+        $expiry = get_config('factor_token', $expiryconfig);
         $expirytime = $basetime + $expiry;
 
         // If expiring overnight, it should expire at 2am the following morning, if required.

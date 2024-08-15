@@ -27,7 +27,8 @@ require_once($CFG->libdir . '/form/text.php');
  * @copyright   Catalyst IT
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class verification_field extends \MoodleQuickForm_text {
+class verification_field extends \MoodleQuickForm_text
+{
 
     /** @var bool */
     private $appendjs;
@@ -40,7 +41,8 @@ class verification_field extends \MoodleQuickForm_text {
      * @param array $attributes
      * @param boolean $auth is this constructed in auth.php loginform_* definitions. Set to false to prevent autosubmission of form.
      */
-    public function __construct($attributes = null, $auth = true) {
+    public function __construct($attributes = null, $auth = true)
+    {
         global $PAGE;
 
         // Force attributes.
@@ -65,7 +67,13 @@ class verification_field extends \MoodleQuickForm_text {
             if ($PAGE->pagelayout === 'secure') {
                 $this->appendjs = true;
             } else {
-                $PAGE->requires->js_call_amd('tool_mfa/autosubmit_verification_code', 'init', []);
+                /**
+                 * Bright Alley modification:
+                 * Autosubmit removed to prevent double invocation of setup_user_factor,
+                 * which causes verification step failure due to session unset.
+                 * $PAGE->requires->js_call_amd('tool_mfa/autosubmit_verification_code', 'init', []);
+                 * Bright Alley modification end.
+                 */
             }
         }
 
@@ -82,7 +90,8 @@ class verification_field extends \MoodleQuickForm_text {
      *
      * @return string
      */
-    public function toHtml() {
+    public function toHtml()
+    {
         // Empty the value after all attributes decided.
         $this->_attributes['value'] = '';
         $result = parent::toHtml();
@@ -108,7 +117,8 @@ class verification_field extends \MoodleQuickForm_text {
      *
      * @return string the JS to inline attach to the rendered object.
      */
-    public function secure_js(): string {
+    public function secure_js(): string
+    {
         // Empty the value after all attributes decided.
         $this->_attributes['value'] = '';
 

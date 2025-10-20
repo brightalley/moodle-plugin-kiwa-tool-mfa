@@ -165,3 +165,4 @@ $string['verificationcode'] = 'Enter verification code for confirmation';
 $string['verificationcode_help'] = 'The verification code provided by the current authentication factor.';
 $string['viewlockedusers'] = 'View locked users';
 $string['weight'] = 'Weight';
+$string['button_label_home'] = 'Back to dashboard';

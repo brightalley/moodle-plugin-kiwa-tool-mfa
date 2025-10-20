@@ -57,10 +57,11 @@ class tool_mfa_renderer extends plugin_renderer_base {
     /**
      * Returns a list of factors which a user can add
      *
-     * @return html
+     * @return string
      */
-    public function available_factors() {
-        $html = $this->output->heading(get_string('preferences:availablefactors', 'tool_mfa'), 2);
+    public function available_factors(): string {
+        $html = '';
+        $headingHtml = $this->output->heading(get_string('preferences:availablefactors', 'tool_mfa'), 2);
 
         $factors = \tool_mfa\plugininfo\factor::get_enabled_factors();
         foreach ($factors as $factor) {
@@ -69,6 +70,10 @@ class tool_mfa_renderer extends plugin_renderer_base {
                 continue;
             }
             $html .= $this->setup_factor($factor);
+        }
+
+        if(!empty($html)){
+            return $headingHtml . $html;
         }
 
         return $html;

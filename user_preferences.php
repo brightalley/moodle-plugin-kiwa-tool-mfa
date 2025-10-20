@@ -60,6 +60,7 @@ if (!empty($action)) {
 
 echo $OUTPUT->active_factors();
 echo $OUTPUT->available_factors();
+echo $OUTPUT->single_button('/', get_string('button_label_home', 'tool_mfa'), "GET");
 
 echo $OUTPUT->guide_link();
 

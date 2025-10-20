@@ -41,7 +41,7 @@ There are other 2FA plugins for moodle such as:
 
 https://moodle.org/plugins/auth_a2fa
 
-This one is different because it is NOT a Moodle authentication plugin. It leverages new API's that Catalyst specifically implemented in Moodle Core to enable plugins to *augment* the login process instead of replacing it. This means that this MFA plugin can be added on top of any other authentication plugin resulting in a much cleaner architecture, and it means you can compose a solution that does everything you need instead of compromising by swapping out the entire login flow.
+This one is different because it is NOT a Moodle authentication plugin. It leverages new APIs that Catalyst specifically implemented in Moodle Core to enable plugins to *augment* the login process instead of replacing it. This means that this MFA plugin can be added on top of any other authentication plugin resulting in a much cleaner architecture, and it means you can compose a solution that does everything you need instead of compromising by swapping out the entire login flow.
 
 See this tracker and the dev docs for more info:
 
@@ -55,15 +55,14 @@ The other major difference is that we support multiple authentication factor **t
 | Version         |  Branch      | Required patches     |
 |-----------------|--------------|----------------------|
 | Moodle 4.0 - 4.2| MOODLE_400_STABLE | None            |
-| Moodle 3.8 -3.9 | MOODLE_35_STABLE | None             |
-| Moodle 3.7      | MOODLE_35_STABLE | MDL-66340            |
-| Moodle 3.5-3.6  | MOODLE_35_STABLE | MDL-66340, MDL-60470 |
+| Moodle 4.3+     | Not supported here, now in Moodle core | |
 
 ## Totara supported branches
 | Version         |  Branch      | Required patches     |
 |-----------------|--------------|----------------------|
 | Totara 12-17    | TOTARA_12 | MDL-66340, MDL-60470 |
 | Totara 18       | TOTARA_18 | MDL-66340, MDL-60470 |
+| Totara 19       | TOTARA_19 | MDL-66340, MDL-60470 |
 
 ## Installation
 

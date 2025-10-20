@@ -463,12 +463,6 @@ class manager {
             return self::NO_REDIRECT;
         }
 
-        // Enrolment.
-        $enrol = new \moodle_url('/enrol/index.php');
-        if ($enrol->compare($url, URL_MATCH_BASE)) {
-            return self::NO_REDIRECT;
-        }
-
         // Guest access.
         if (isguestuser()) {
             return self::NO_REDIRECT;
@@ -620,7 +614,9 @@ class manager {
 
         if (!self::is_ready()) {
             // Set session var so if MFA becomes ready, you dont get locked from session.
-            $SESSION->tool_mfa_authenticated = true;
+            if (get_config('tool_mfa', 'enabled')) {
+                $SESSION->tool_mfa_authenticated = true;
+            }
             return;
         }
 
